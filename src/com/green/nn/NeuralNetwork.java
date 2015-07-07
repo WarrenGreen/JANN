@@ -10,8 +10,6 @@ public class NeuralNetwork {
 	List<Neuron> hidden;
 	List<Neuron> outputs;
 	
-	Random rand = new Random();
-	
 	public NeuralNetwork(int inputSize, int hiddenSize, int outputSize) {
 		inputs = new ArrayList<>();
 		hidden = new ArrayList<>();
@@ -22,15 +20,19 @@ public class NeuralNetwork {
 		
 		for(int i=0;i<hiddenSize;i++) {
 			Neuron n = new Neuron();
-			n.addAxons(inputs, rand.nextDouble());
+			n.addAxons(inputs);
 			hidden.add(n);
 		}
 		
 		for(int i=0;i<outputSize;i++) {
 			Neuron n = new Neuron();
-			n.addAxons(hidden, rand.nextDouble());
+			n.addAxons(hidden);
 			outputs.add(n);
 		}
+
+        for(Neuron n: hidden) {
+            n.addNexts(outputs);
+        }
 	}
 	
 	public List<Double> compute() {
@@ -53,11 +55,21 @@ public class NeuralNetwork {
 	}
 	
 	public static void main(String[] args) {
-		NeuralNetwork nn = new NeuralNetwork(2, 3, 2);
-		nn.setInputValues(Arrays.asList(.3, .8));
-		
-		for(Double d: nn.compute())
-			System.out.println(d);
-		
-	}
+		NeuralNetwork nn = new NeuralNetwork(1, 1, 1);
+		nn.setInputValues(Arrays.asList(.3));
+
+        for(int i=0;i<10;i++) {
+            nn.setInputValues(Arrays.asList(.3));
+            for (Double d : nn.compute())
+                System.out.println(d);
+
+            nn.outputs.get(0).adjustWeights(0);
+            //nn.outputs.get(1).adjustWeights(1);
+
+            for (Neuron n : nn.hidden)
+                n.adjustWeights(nn.outputs);
+
+            System.out.println();
+        }
+    }
 }
