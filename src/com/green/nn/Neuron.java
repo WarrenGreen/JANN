@@ -10,13 +10,10 @@ import java.util.Map.Entry;
 
 public class Neuron {
 
-    public enum Type {INPUT, HIDDEN, OUTPUT}
-
 	private Map<Neuron, Double> weights;
     private List<Neuron> next;
 	private double value;
     private double error;
-    private Type type;
 
 	public Neuron() {
 		weights = new HashMap<>();
@@ -59,15 +56,6 @@ public class Neuron {
             double newWeight = weights.get(n) + (error * n.getValue());
             weights.put(n, newWeight);
         }
-    }
-
-    public void addNext(Neuron n) {
-        next.add(n);
-    }
-
-    public void addNexts(Iterable<Neuron> neurons) {
-        for(Neuron n: neurons)
-            addNext(n);
     }
 
     public void addAxon(Neuron n, double weight) {

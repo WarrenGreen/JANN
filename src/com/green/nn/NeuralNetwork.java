@@ -7,8 +7,8 @@ import java.util.Random;
 
 public class NeuralNetwork {
 	List<Neuron> inputs;
-	List<Neuron> hidden;
-	List<Neuron> outputs;
+	public List<Neuron> hidden;
+	public List<Neuron> outputs;
 	
 	public NeuralNetwork(int inputSize, int hiddenSize, int outputSize) {
 		inputs = new ArrayList<>();
@@ -30,9 +30,6 @@ public class NeuralNetwork {
 			outputs.add(n);
 		}
 
-        for(Neuron n: hidden) {
-            n.addNexts(outputs);
-        }
 	}
 	
 	public List<Double> compute() {
@@ -53,21 +50,39 @@ public class NeuralNetwork {
 		for(int i=0;i<inputs.size();i++)
 			inputs.get(i).setValue(values.get(i));
 	}
+
+    public static int thresholdFunction(double d) {
+        if (d < .5)
+            return 0;
+        else
+            return 1;
+    }
 	
 	public static void main(String[] args) {
-		NeuralNetwork nn = new NeuralNetwork(1, 1, 1);
-		nn.setInputValues(Arrays.asList(.3));
+		NeuralNetwork nn = new NeuralNetwork(2,3,2);
+		nn.setInputValues(Arrays.asList(.3, .8));
 
-        for(int i=0;i<10;i++) {
-            nn.setInputValues(Arrays.asList(.3));
-            for (Double d : nn.compute())
-                System.out.println(d);
+        for(int i=0;i<100;i++) {
+            nn.setInputValues(Arrays.asList(.3, .7));
 
-            nn.outputs.get(0).adjustWeights(0);
+            List<Double> outputs = nn.compute();
+
+            if(thresholdFunction(outputs.get(0)) == 1) {
+                nn.outputs.get(0).adjustWeights(0);
+                for (Neuron n : nn.hidden)
+                    n.adjustWeights(nn.outputs);
+                System.out.println("HIT+++++++++++++++++++");
+            } else if(thresholdFunction(outputs.get(1)) == 0) {
+                nn.outputs.get(1).adjustWeights(1);
+                for (Neuron n : nn.hidden)
+                    n.adjustWeights(nn.outputs);
+                System.out.println("HIT+++++++++++++++++++");
+            }else{
+                System.out.println("Good ==========");
+            }
             //nn.outputs.get(1).adjustWeights(1);
 
-            for (Neuron n : nn.hidden)
-                n.adjustWeights(nn.outputs);
+
 
             System.out.println();
         }
