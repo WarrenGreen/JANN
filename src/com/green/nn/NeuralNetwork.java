@@ -5,11 +5,24 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Neural Network supporting one hidden layer and threshold output
+ * 
+ * @author wsgreen
+ *
+ */
 public class NeuralNetwork {
-	List<Neuron> inputs;
-	public List<Neuron> hidden;
-	public List<Neuron> outputs;
+	private List<Neuron> inputs;
+	private List<Neuron> hidden;
+	private List<Neuron> outputs;
+	public static double learningRate = 1.75;
 	
+	/**
+	 * 
+	 * @param inputSize
+	 * @param hiddenSize
+	 * @param outputSize
+	 */
 	public NeuralNetwork(int inputSize, int hiddenSize, int outputSize) {
 		inputs = new ArrayList<>();
 		hidden = new ArrayList<>();
@@ -32,59 +45,57 @@ public class NeuralNetwork {
 
 	}
 	
-	public List<Double> compute() {
-		List<Double> outputValues = new ArrayList<>();
+	/**
+	 * Compute values for each node from hidden to output
+	 * @return
+	 */
+	public List<Integer> compute() {
+		List<Integer> outputValues = new ArrayList<>();
 		
 		for(Neuron n: hidden)
 			n.compute();
 		
 		for(Neuron n: outputs) {
 			n.compute();
-			outputValues.add(n.getValue());
+			outputValues.add(thresholdFunction(n.getValue()));
 		}
 		
 		return outputValues;
 	}
 	
+	/**
+	 * Adjust weights for each node based on expected outputs for output nodes
+	 * @param expected
+	 */
+	public void train(List<Integer> expected) {
+		for(int i=0;i<outputs.size();i++)
+			outputs.get(i).adjustWeights(expected.get(i));
+		
+		for(Neuron n: hidden)
+			n.adjustWeights(outputs);
+		
+	}
+	
+	/**
+	 * Set values for input nodes
+	 * @param values
+	 */
 	public void setInputValues(List<Double> values) {
 		for(int i=0;i<inputs.size();i++)
 			inputs.get(i).setValue(values.get(i));
 	}
 
+	/**
+	 * Binary output based on threshold value of 0.5
+	 * 
+	 * @param d
+	 * @return
+	 */
     public static int thresholdFunction(double d) {
-        if (d < .5)
+        if (d < 0.5)
             return 0;
         else
             return 1;
     }
 	
-	public static void main(String[] args) {
-		NeuralNetwork nn = new NeuralNetwork(2,3,2);
-		nn.setInputValues(Arrays.asList(.3, .8));
-
-        for(int i=0;i<100;i++) {
-            nn.setInputValues(Arrays.asList(.3, .7));
-
-            List<Double> outputs = nn.compute();
-
-            if(thresholdFunction(outputs.get(0)) == 1) {
-                nn.outputs.get(0).adjustWeights(0);
-                for (Neuron n : nn.hidden)
-                    n.adjustWeights(nn.outputs);
-                System.out.println("HIT+++++++++++++++++++");
-            } else if(thresholdFunction(outputs.get(1)) == 0) {
-                nn.outputs.get(1).adjustWeights(1);
-                for (Neuron n : nn.hidden)
-                    n.adjustWeights(nn.outputs);
-                System.out.println("HIT+++++++++++++++++++");
-            }else{
-                System.out.println("Good ==========");
-            }
-            //nn.outputs.get(1).adjustWeights(1);
-
-
-
-            System.out.println();
-        }
-    }
 }
